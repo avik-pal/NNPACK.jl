@@ -49,6 +49,8 @@ const nnp_convolution_transform_strategy_compute = (UInt32)(1)
 const nnp_convolution_transform_strategy_precompute = (UInt32)(2)
 const nnp_convolution_transform_strategy_reuse = (UInt32)(3)
 
+const pthreadpool_t = Ptr{Nothing}
+
 struct nnp_size
 	width::Csize_t
 	height::Csize_t
