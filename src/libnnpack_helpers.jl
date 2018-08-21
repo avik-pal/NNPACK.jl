@@ -52,21 +52,21 @@ const nnp_convolution_transform_strategy_reuse = (UInt32)(3)
 const pthreadpool_t = Ptr{Nothing}
 
 struct nnp_size
-	width::Csize_t
-	height::Csize_t
+    width::Csize_t
+    height::Csize_t
 end
 
 struct nnp_padding
-	top::Csize_t
-	right::Csize_t
-	bottom::Csize_t
-	left::Csize_t
+    top::Csize_t
+    right::Csize_t
+    bottom::Csize_t
+    left::Csize_t
 end
 
 struct nnp_profile
-	total::Cdouble
-	input_transform::Cdouble
-	kernel_transform::Cdouble
-	output_transform::Cdouble
-	block_multiplication::Cdouble
+    total::Cdouble
+    input_transform::Cdouble
+    kernel_transform::Cdouble
+    output_transform::Cdouble
+    block_multiplication::Cdouble
 end
