@@ -41,7 +41,6 @@ end
 function nnp_softmax_output(x::AbstractVecOrMat{Float32}; inplace::Bool = true, threadpool = nothing)
     y = inplace ? x : zeros(Float32, size(x))
     threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
-    # Investigate why the channel and batch dims need to specified like this
     nnp_softmax_output(ndims(x) == 2 ? Csize_t(size(x, 2)) : 1, Csize_t(size(x, 1)), x, y, threadpool)
     y
 end
