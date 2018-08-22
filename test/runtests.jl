@@ -2,6 +2,8 @@ using NNPACK, Test, Random
 
 Random.seed!(144)
 
+#TODO: Add tests and compare the results with NNlib
+
 @testset "Activation" begin
     @testset "Relu / Leaky Relu" begin
         x = randn(Float32, 4, 4, 4, 4)

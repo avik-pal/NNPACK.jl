@@ -33,3 +33,15 @@ function nnp_relu_input_gradient(x::AbstractArray{Float32,N}, dy::AbstractArray{
     nnp_relu_input_gradient(Csize_t(prod(size(x)[N-1:N])), Csize_t(prod(size(x)[1:N-2])), dy, x, dx, Cfloat(negative_slope), threadpool)
     dx
 end
+
+function nnp_softmax_output(batch_size, channels, input, output, threadpool)
+    @check ccall((:nnp_softmax_output, "libnnpack"), nnp_status, (Csize_t, Csize_t, Ptr{Cfloat}, Ptr{Cfloat}, pthreadpool_t), batch_size, channels, input, output, threadpool)
+end
+
+function nnp_softmax_output(x::AbstractVecOrMat{Float32}; inplace::Bool = true, threadpool = nothing)
+    y = inplace ? x : zeros(Float32, size(x))
+    threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
+    # Investigate why the channel and batch dims need to specified like this
+    nnp_softmax_output(ndims(x) == 2 ? Csize_t(size(x, 2)) : 1, Csize_t(size(x, 1)), x, y, threadpool)
+    y
+end
