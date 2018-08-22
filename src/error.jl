@@ -6,6 +6,7 @@ end
 Base.show(io::IO, err::NNPACKError) = print(io, "NNPACKError(code $(err.code), $(err.msg))")
 
 function NNPACKError(status::nnp_status)
+    msg = "NNPACK STATUS SUCCESS"
     if status == nnp_status_invalid_batch_size
         msg = "NNPACK STATUS INVALID BATCH SIZE"
     elseif status == nnp_status_invalid_channels
