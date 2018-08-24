@@ -51,22 +51,31 @@ const nnp_convolution_transform_strategy_reuse = (UInt32)(3)
 
 const pthreadpool_t = Ptr{Nothing}
 
-struct nnp_size
+mutable struct nnp_size
     width::Csize_t
     height::Csize_t
+    nnp_size() = new(Int32(0), Int32(0))
 end
 
-struct nnp_padding
+Base.unsafe_convert(::Type{Ptr{nnp_size}}, a::nnp_size) = Ptr{a}
+
+mutable struct nnp_padding
     top::Csize_t
     right::Csize_t
     bottom::Csize_t
     left::Csize_t
+    nnp_padding() = new(Int32(0), Int32(0), Int32(0), Int32(0))
 end
 
-struct nnp_profile
+Base.unsafe_convert(::Type{Ptr{nnp_padding}}, a::nnp_padding) = Ptr{a}
+
+mutable struct nnp_profile
     total::Cdouble
     input_transform::Cdouble
     kernel_transform::Cdouble
     output_transform::Cdouble
     block_multiplication::Cdouble
+    nnp_profile() = new(0.0, 0.0, 0.0, 0.0, 0.0)
 end
+
+Base.unsafe_convert(::Type{Ptr{nnp_profile}}, a::nnp_profile) = Ptr{a}

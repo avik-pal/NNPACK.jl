@@ -1,7 +1,7 @@
 module NNPACK
 
 export relu, leaky_relu, ∇relu, ∇leaky_relu,
-       relu!, leaky_relu!, softmax, softmax!
+       softmax, fully_connected
 
 include("libnnpack_types.jl")
 include("error.jl")
