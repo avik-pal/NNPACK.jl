@@ -7,7 +7,7 @@ function nnp_deinitialize()
 end
 
 function pthreadpool_create(n::Int = 0)
-    ccall((:pthreadpool_create, "libnnpack"), Ptr{Nothing}, (Csize_t,), n)
+    ccall((:pthreadpool_create, "libnnpack"), Ptr{Cvoid}, (Csize_t,), n)
 end
 
 function nnp_relu_output(batch_size, channels, input, output, negative_slope, threadpool)
@@ -46,7 +46,7 @@ function nnp_softmax_output(x::AbstractVecOrMat{Float32}; inplace::Bool = true, 
 end
 
 function nnp_fully_connected_output(batch_size, input_channels, output_channels, input, kernel, output, threadpool, profile)
-    @check ccall((:nnp_fully_connected_output, "libnnpack"), nnp_status, (Csize_t, Csize_t, Csize_t, Ptr{Cfloat}, Ptr{Cfloat}, Ptr{Cfloat}, pthreadpool_t, Ptr{Nothing}), batch_size, input_channels, output_channels, input, kernel, output, threadpool, C_NULL)
+    @check ccall((:nnp_fully_connected_output, "libnnpack"), nnp_status, (Csize_t, Csize_t, Csize_t, Ptr{Cfloat}, Ptr{Cfloat}, Ptr{Cfloat}, pthreadpool_t, Ptr{Cvoid}), batch_size, input_channels, output_channels, input, kernel, output, threadpool, C_NULL)
 end
 
 function nnp_fully_connected_output(x::AbstractArray{Float32,2}, w::AbstractArray{Float32,2}; profile = nothing, threadpool = nothing)
@@ -60,7 +60,7 @@ function nnp_fully_connected_output(x::AbstractArray{Float32,2}, w::AbstractArra
 end
 
 function nnp_fully_connected_inference_f16f32(input_channels, output_channels, input, kernel, output, threadpool)
-    @check ccall((:nnp_fully_connected_inference_f16f32, "libnnpack"), nnp_status, (Csize_t, Csize_t, Ptr{Cfloat}, Ptr{Nothing}, Ptr{Cfloat}, pthreadpool_t), input_channels, output_channels, input, kernel, output, threadpool)
+    @check ccall((:nnp_fully_connected_inference_f16f32, "libnnpack"), nnp_status, (Csize_t, Csize_t, Ptr{Cfloat}, Ptr{Cvoid}, Ptr{Cfloat}, pthreadpool_t), input_channels, output_channels, input, kernel, output, threadpool)
 end
 
 nnp_fully_connected_inference_f16f32(x::AbstractVector{Float32}, w::AbstractArray{Float16,2}; threadpool = nothing) =
@@ -89,4 +89,18 @@ function nnp_fully_connected_inference(x::AbstractMatrix{Float32}, w::AbstractAr
     threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
     nnp_fully_connected_inference(input_channels, output_channels, x, w, y, threadpool)
     y
+end
+
+function nnp_max_pooling_output(batch_size, channels, input_size, input_padding, pooling_size, pooling_stride, input, output, threadpool)
+    @check ccall((:nnp_max_pooling_output, "libnnpack"), nnp_status, (Csize_t, Csize_t, nnp_size, nnp_padding, nnp_size, nnp_size, Ptr{Cfloat}, Ptr{Cfloat}, pthreadpool_t), batch_size, channels, input_size, input_padding, pooling_size, pooling_stride, input, output, threadpool)
+end
+
+function nnp_max_pooling_output(x::AbstractArray{Float32,4}; padding = 0, stride = 1, kernel = 1, threadpool = nothing)
+    input_size = nnp_size(Csize_t.(size(x, 1), size(x, 2))...)
+    pooling_size = nnp_size(Csize_t.(padtuple(x, kernel))...)
+    input_padding = nnp_padding(Csize_t.(map(_ -> padding, size(x)))...)
+    pooling_stride = nnp_size(Csize_t.(padtuple(x, stride))...)
+    threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
+    y = zeros(Float32, size(x))
+    nnp_max_pooling_output(size(x, 4), size(x, 3), input_size, input_padding, pooling_size, pooling_stride, x, y, threadpool)
 end
