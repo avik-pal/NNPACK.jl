@@ -41,7 +41,7 @@ function fully_connected(x::AbstractArray{T,2}, w::AbstractArray{T,2}; nthreads:
     nnp_fully_connected_output(x, w, threadpool = threadpool)
 end
 
-function maxpool2d(x::AbstractArray{T,4}; stride = 1, kernel = 1, pad = 0, nthreads::Int = 0) where T
+function maxpool2d(x::AbstractArray{T,4}, kernel::AbstractArray{T,2}; stride = 1, pad = 0, nthreads::Int = 0) where T
     T == Float32 || error("NNPACK MAXPOOL 2D supports only Float32")
     threadpool = pthreadpool_create(nthreads)
     nnp_max_pooling_output(x, padding = pad, stride = stride, kernel = kernel, threadpool = threadpool)
