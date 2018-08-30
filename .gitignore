@@ -1,3 +1,4 @@
 *.so
 build.log
 deps/usr
+deps.jl

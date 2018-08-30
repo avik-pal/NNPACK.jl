@@ -1,5 +1,5 @@
 function nnp_initialize()
-    ccall((:nnp_initialize, "libnnpack"), nnp_status, (),)
+    ccall((:nnp_initialize, libnnpack), nnp_status, (),)
 end
 
 function nnp_deinitialize()
