@@ -1,3 +1,8 @@
+name = "NNPACK"
+uuid = "604dc2f4-ac51-11e8-3999-f92ab8bae618"
+authors = ["Avik Pal <avikpal@iitk.ac.in>"]
+version = "0.1.0"
+
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
