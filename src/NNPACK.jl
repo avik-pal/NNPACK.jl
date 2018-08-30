@@ -1,15 +1,12 @@
+__precompile__()
+
 module NNPACK
 
-using Libdl
-
-export relu, leaky_relu, ∇relu, ∇leaky_relu,
-       softmax, fully_connected, maxpool2d
+using Libdl, Requires
 
 include("libnnpack_types.jl")
 include("error.jl")
-include("utils.jl")
 include("libnnpack.jl")
-include("interface.jl")
 
 const depsjl_path = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
 if !isfile(depsjl_path)
@@ -20,6 +17,14 @@ include(depsjl_path)
 function __init__()
     check_deps()
     nnp_initialize()
+    has_nnlib = false
+    @require NNlib="872c559c-99b0-510c-b3b7-b6c96a88d5cd" has_nnlib=true
+    if has_nnlib
+        include(joinpath(dirname(@__FILE__), "nnlib.jl"))
+    else
+        include(joinpath(dirname(@__FILE__), "interface.jl"))
+        include(joinpath(dirname(@__FILE__), "utils.jl"))
+    end
 end
 
 end
