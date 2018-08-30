@@ -79,7 +79,7 @@ mutable struct nnp_profile
     output_transform::Cdouble
     block_multiplication::Cdouble
     nnp_profile() = new(Cdouble(0.0), Cdouble(0.0), Cdouble(0.0), Cdouble(0.0), Cdouble(0.0))
-    nnp_profile(t, it, kt, ot, bm) = new(Cdouble(t), Cdouble(it), Cdouble(kt, Cdouble(ot), Cdouble(bm)))
+    nnp_profile(t, it, kt, ot, bm) = new(Cdouble(t), Cdouble(it), Cdouble(kt), Cdouble(ot), Cdouble(bm))
 end
 
 Base.unsafe_convert(::Type{Ptr{nnp_profile}}, a::nnp_profile) = Ptr{a}
