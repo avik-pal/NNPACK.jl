@@ -54,7 +54,8 @@ const pthreadpool_t = Ptr{Nothing}
 mutable struct nnp_size
     width::Csize_t
     height::Csize_t
-    nnp_size() = new(Int32(0), Int32(0))
+    nnp_size() = new(Csize_t(0), Csize_t(0))
+    nnp_size(w, h) = new(Csize_t(w), Csize_t(h))
 end
 
 Base.unsafe_convert(::Type{Ptr{nnp_size}}, a::nnp_size) = Ptr{a}
@@ -64,7 +65,9 @@ mutable struct nnp_padding
     right::Csize_t
     bottom::Csize_t
     left::Csize_t
-    nnp_padding() = new(Int32(0), Int32(0), Int32(0), Int32(0))
+    nnp_padding() = new(Csize_t(0), Csize_t(0), Csize_t(0), Csize_t(0))
+    nnp_padding(val) = new(Csize_t(val), Csize_t(val), Csize_t(val), Csize_t(val))
+    nnp_padding(t, r, b, l) = new(Csize_t(t), Csize_t(r), Csize_t(b), Csize_t(l))
 end
 
 Base.unsafe_convert(::Type{Ptr{nnp_padding}}, a::nnp_padding) = Ptr{a}
@@ -75,7 +78,8 @@ mutable struct nnp_profile
     kernel_transform::Cdouble
     output_transform::Cdouble
     block_multiplication::Cdouble
-    nnp_profile() = new(0.0, 0.0, 0.0, 0.0, 0.0)
+    nnp_profile() = new(Cdouble(0.0), Cdouble(0.0), Cdouble(0.0), Cdouble(0.0), Cdouble(0.0))
+    nnp_profile(t, it, kt, ot, bm) = new(Cdouble(t), Cdouble(it), Cdouble(kt, Cdouble(ot), Cdouble(bm)))
 end
 
 Base.unsafe_convert(::Type{Ptr{nnp_profile}}, a::nnp_profile) = Ptr{a}

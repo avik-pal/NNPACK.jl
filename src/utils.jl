@@ -1,4 +1,7 @@
-#Most of these functions have been borrowed from NNlib.jl
+#Most of these functions have been borrowed from NNlib.jl and will be removed once NNlib dependency is added
+
+expand(::Type{Val{N}}, i::Integer) where N = ntuple(_ -> i, Val(N))
+expand(::Type{Val{N}}, i::NTuple{N, Integer}) where N = i
 
 function cdims(x::NTuple{N}, w::NTuple{N}, pad, stride) where N
     ntuple(Val{N}) do i
@@ -37,6 +40,16 @@ function dilation_dims(w, dilation = 1)
             (dims_w[i] - 1) * dil[i] + 1
         else
             dims_w[i]
+        end
+    end
+end
+
+function pdims(dims::Dims{N}, window, padding, stride) where N
+    ntuple(Val(N)) do i
+        if i < N-1
+            1 + (dims[i] + 2*padding[i] - window[i])÷stride[i]
+        else
+            dims[i]
         end
     end
 end

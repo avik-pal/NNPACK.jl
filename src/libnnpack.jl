@@ -95,14 +95,15 @@ function nnp_max_pooling_output(batch_size, channels, input_size, input_padding,
     @check ccall((:nnp_max_pooling_output, "libnnpack"), nnp_status, (Csize_t, Csize_t, nnp_size, nnp_padding, nnp_size, nnp_size, Ptr{Cfloat}, Ptr{Cfloat}, pthreadpool_t), batch_size, channels, input_size, input_padding, pooling_size, pooling_stride, input, output, threadpool)
 end
 
-function nnp_max_pooling_output(x::AbstractArray{Float32,4}, kernel::AbstractArray{Float32,2}; padding = 0, stride = 1, threadpool = nothing)
-    input_size = nnp_size(Csize_t.(size(x, 1), size(x, 2))...)
-    pooling_size = nnp_size(Csize_t.(padtuple(x, kernel))...)
+function nnp_max_pooling_output(x::AbstractArray{Float32,4}, kernel::Tuple; padding = 0, stride = 1, threadpool = nothing)
+    input_size = nnp_size(Csize_t.((size(x, 1), size(x, 2)))...)
+    pooling_size = nnp_size(Csize_t.(kernel)...)
     input_padding = nnp_padding(Csize_t.(map(_ -> padding, size(x)))...)
     pooling_stride = nnp_size(Csize_t.(padtuple(x, stride))...)
     threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
-    y = similar(x, pdims(size(x), kernel, expand(Val{length(kernel)}, pad), expand(Val{length(kernel)}, stride)))
+    y = similar(x, pdims(size(x), kernel, expand(Val{length(kernel)}, padding), expand(Val{length(kernel)}, stride)))
     nnp_max_pooling_output(size(x, 4), size(x, 3), input_size, input_padding, pooling_size, pooling_stride, x, y, threadpool)
+    y
 end
 
 #TODO: Add wrapper for convolution inference
@@ -111,10 +112,43 @@ function nnp_convolution_input_gradient(algorithm, batch_size, input_channels, o
     @check ccall((:nnp_convolution_kernel_gradient, "libnnpack"), nnp_status, (nnp_convolution_algorithm, Csize_t, Csize_t, Csize_t, nnp_size, nnp_padding, nnp_size, Ptr{float}, Ptr{float}, Ptr{float}, Ptr{Cvoid}, Ptr{Csize_t}, nnp_activation, Ptr{Cvoid}, pthreadpool_t, Ptr{Cvoid}), algorithm, batch_size, input_channels, output_channels, input_size, input_padding, kernel_size, grad_output, kernel, grad_input, workspace_buffer, workspace_size, activation, activation_parameters, threadpool, C_NULL)
 end
 
+function nnp_convolution_input_gradient(x::AbstractArray{Float32,4}, dy::AbstractArray{Float32,4}, w::AbstractArray{Float32,4}; algo::nnp_convolution_algorithm = 0, workspace_buffer = nothing, workspace_size = 0, padding = 0, stride = 1, threadpool = nothing)
+    input_size = nnp_size(Csize_t.((size(x,1), size(x,2)))...)
+    kernel_size = nnp_size(Csize_t.((size(w,1),size(w,2)))...)
+    input_padding = nnp_padding(Csize_t.(map(_ -> padding, size(x)))...)
+    threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
+    workspace_buffer = workspace_buffer === nothing ? C_NULL : workspace_buffer
+    dx = similar(x)
+    nnp_convolution_input_gradient(algo, size(x,4), size(x,3), size(w,4), input_size, input_padding, kernel_size, dy, w, dx, workspace_buffer, workspace_size, UInt32(0), C_NULL, threadpool, profile)
+    dx
+end
+
 function nnp_convolution_kernel_gradient(algorithm, batch_size, input_channels, output_channels, input_size, input_padding, kernel_size, input, grad_output, grad_kernel, workspace_buffer, workspace_size, activation, activation_parameters, threadpool, profile)
     @check ccall((:nnp_convolution_kernel_gradient, "libnnpack"), nnp_status, (nnp_convolution_algorithm, Csize_t, Csize_t, Csize_t, nnp_size, nnp_padding, nnp_size, Ptr{float}, Ptr{float}, Ptr{float}, Ptr{Cvoid}, Ptr{Csize_t}, nnp_activation, Ptr{Cvoid}, pthreadpool_t, Ptr{Cvoid}), algorithm, batch_size, input_channels, output_channels, input_size, input_padding, kernel_size, input, grad_output, grad_kernel, workspace_buffer, workspace_size, activation, activation_parameters, threadpool, C_NULL)
 end
 
+function nnp_convolution_kernel_gradient(x::AbstractArray{Float32,4}, dy::AbstractArray{Float32,4}, w::AbstractArray{Float32,4}; algo::nnp_convolution_algorithm = 0, workspace_buffer = nothing, workspace_size = 0, padding = 0, stride = 1, threadpool = nothing)
+    input_size = nnp_size(Csize_t.((size(x,1), size(x,2)))...)
+    kernel_size = nnp_size(Csize_t.((size(w,1),size(w,2)))...)
+    input_padding = nnp_padding(Csize_t.(map(_ -> padding, size(x)))...)
+    threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
+    workspace_buffer = workspace_buffer === nothing ? C_NULL : workspace_buffer
+    dw = similar(w)
+    nnp_convolution_kernel_gradient(algo, size(x,4), size(x,3), size(w,4), input_size, input_padding, kernel_size, x, dy, dw, workspace_buffer, workspace_size, UInt32(0), C_NULL, threadpool, profile)
+    dw
+end
+
 function nnp_convolution_output(algorithm, batch_size, input_channels, output_channels, input_size, input_padding, kernel_size, input, kernel, bias, output, workspace_buffer, workspace_size, activation, activation_parameters, threadpool, profile)
     @check ccall((:nnp_convolution_output, "libnnpack"), nnp_status, (nnp_convolution_algorithm, Csize_t, Csize_t, Csize_t, nnp_size, nnp_padding, nnp_size, Ptr{float}, Ptr{float}, Ptr{float}, Ptr{float}, Ptr{Cvoid}, Ptr{Csize_t}, nnp_activation, Ptr{Cvoid}, pthreadpool_t, Ptr{Cvoid}), algorithm, batch_size, input_channels, output_channels, input_size, input_padding, kernel_size, input, kernel, bias, output, workspace_buffer, workspace_size, activation, activation_parameters, threadpool, C_NULL)
+end
+
+function nnp_convolution_output(x::AbstractArray{Float32,4}, w::AbstractArray{Float32,4}, b::AbstractArray{Float32,4}; algo::nnp_convolution_algorithm = 0, workspace_buffer = nothing, workspace_size = 0, padding = 0, stride = 1, threadpool = nothing)
+    input_size = nnp_size(Csize_t.((size(x,1), size(x,2)))...)
+    kernel_size = nnp_size(Csize_t.((size(w,1),size(w,2)))...)
+    input_padding = nnp_padding(Csize_t.(map(_ -> padding, size(x)))...)
+    threadpool = threadpool === nothing ? pthreadpool_create() : threadpool
+    workspace_buffer = workspace_buffer === nothing ? C_NULL : workspace_buffer
+    y = similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_))
+    nnp_convolution_kernel_gradient(algo, size(x,4), size(x,3), size(w,4), input_size, input_padding, kernel_size, x, w, b, y, workspace_buffer, workspace_size, UInt32(0), C_NULL, threadpool, profile)
+    y
 end
