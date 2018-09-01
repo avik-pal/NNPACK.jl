@@ -1,4 +1,4 @@
-#Most of these functions have been borrowed from NNlib.jl and will be removed once NNlib dependency is added
+# Most of these functions have been borrowed from NNlib.jl
 
 expand(::Type{Val{N}}, i::Integer) where N = ntuple(_ -> i, Val(N))
 expand(::Type{Val{N}}, i::NTuple{N, Integer}) where N = i
