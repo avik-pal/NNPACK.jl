@@ -40,7 +40,7 @@ function conv(x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, n
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
     y = similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_))
     b = zeros(Float32, size(y, 3))
-    conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+    conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
 function conv(x::AA{4}, w::AA{4}, b::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0)
