@@ -4,7 +4,7 @@ expand(::Type{Val{N}}, i::Integer) where N = ntuple(_ -> i, Val(N))
 expand(::Type{Val{N}}, i::NTuple{N, Integer}) where N = i
 
 function cdims(x::NTuple{N}, w::NTuple{N}, pad, stride) where N
-    ntuple(Val{N}) do i
+    ntuple(Val(N)) do i
         if i < N-1
             1 + div(x[i] - w[i] + 2*pad[i], stride[i])
         elseif i == N-1

@@ -51,3 +51,21 @@ end
 
 conv!(y::AA{4}, x::AA{4}, w::AA{4}, b::AA{1}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) =
     nnp_convolution_output(y, x, w, b, algo = algo, padding = pad, stride = stride, threadpool = threadpool)
+
+function ∇conv_data(dy::AA{4}, x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing)
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    ∇conv_data!(zeros(Float32, size(x)), dy, x, w; pad = pad, stride = stride, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+end
+
+∇conv_data!(dx::AA{4}, dy::AA{4}, x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) =
+    nnp_convolution_input_gradient(dx, x, dy, w, padding = pad, stride = stride, dilation = dilation, algo = algo, threadpool = threadpool)
+
+function ∇conv_filter(dy::AA{4}, x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing)
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    ∇conv_filter!(zeros(Float32, size(w)), dy, x, w; pad = pad, stride = stride, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+end
+
+∇conv_filter!(dw::AA{4}, dy::AA{4}, x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) =
+    nnp_convolution_kernel_gradient(dw, x, dy, w, padding = pad, stride = stride, dilation = dilation, algo = algo, threadpool = threadpool)

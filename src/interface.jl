@@ -1,5 +1,5 @@
-export relu, leakyrelu, ∇relu, ∇leakyrelu,
-       softmax, fullyconnected, maxpool
+export relu, leakyrelu, ∇relu, ∇leakyrelu, softmax, fullyconnected,
+       maxpool, conv, ∇conv_data, ∇conv_filter
 
 function relu(x::AbstractArray{T,N}; inplace::Bool = true, nthreads::Int = 0) where {T,N}
     T == Float32 || error("NNPACK RELU supports only Float32")
@@ -55,3 +55,42 @@ function fullyconnected(x::AbstractArray{T,2}, w::AbstractArray{T,2}; nthreads::
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     nnp_fully_connected_output(x, w, zeros(Float32, size(w,1), size(x,2)), threadpool = pthreadpool_create(nthreads))
 end
+
+function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0) where T
+    T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    y = similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_))
+    b = zeros(Float32, size(y, 3))
+    conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
+end
+
+function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0) where T
+    T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+end
+
+conv!(y::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,1}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T =
+    nnp_convolution_output(y, x, w, b, algo = algo, padding = pad, stride = stride, threadpool = threadpool)
+
+function ∇conv_data(dy::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T
+    T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    ∇conv_data!(zeros(Float32, size(x)), dy, x, w; pad = pad, stride = stride, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+end
+
+∇conv_data!(dx::AbstractArray{T,4}, dy::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T =
+    nnp_convolution_input_gradient(dx, x, dy, w, padding = pad, stride = stride, dilation = dilation, algo = algo, threadpool = threadpool)
+
+function ∇conv_filter(dy::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T
+    T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
+    dilation == 1 || error("NNPACK does not support dilation > 1")
+    pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
+    ∇conv_filter!(zeros(Float32, size(w)), dy, x, w; pad = pad, stride = stride, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+end
+
+∇conv_filter!(dw::AbstractArray{T,4}, dy::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T =
+    nnp_convolution_kernel_gradient(dw, x, dy, w, padding = pad, stride = stride, dilation = dilation, algo = algo, threadpool = threadpool)
