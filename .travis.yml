@@ -12,4 +12,4 @@ git:
 
 ## uncomment the following lines to override the default test script
 script:
- - julia -e 'ENV["JULIA_NUM_THREADS"]=4; Pkg.clone(pwd()); Pkg.build("NNlib"); Pkg.test("NNlib"; coverage=true)'
+ - julia -e 'ENV["JULIA_NUM_THREADS"]=4; using Pkg; Pkg.clone(pwd()); Pkg.build("NNPACK"); Pkg.test("NNPACK"; coverage=true)'
