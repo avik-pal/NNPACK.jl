@@ -65,7 +65,7 @@ function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1,
     conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
-function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
+function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,1}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
