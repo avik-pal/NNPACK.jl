@@ -2,7 +2,7 @@ module NNPACK
 
 using Libdl, Requires
 
-const NNPACK_CPU_THREADS = JULIA_NUM_THREADS
+const NNPACK_CPU_THREADS = parse(UInt64, ENV["JULIA_NUM_THREADS"])
 
 include("libnnpack_types.jl")
 include("error.jl")
