@@ -1,5 +1,7 @@
 using NNPACK, Test, Random
 
+Random.seed!(144)
+
 @testset "Activation" begin
     @testset "Relu / Leaky Relu" begin
         x = randn(Float32, 4, 4, 4, 4)

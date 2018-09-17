@@ -1,46 +1,46 @@
 export relu, leakyrelu, ∇relu, ∇leakyrelu, softmax, fullyconnected,
        maxpool, conv, ∇conv_data, ∇conv_filter
 
-function relu(x::AbstractArray{T,N}; inplace::Bool = true, nthreads::Int = 0) where {T,N}
+function relu(x::AbstractArray{T,N}; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) where {T,N}
     T == Float32 || error("NNPACK RELU supports only Float32")
     N != 1 || error("NNPACK RELU requires an array of 2 or more dimensions")
     nnp_relu_output(x, inplace ? x : similar(x), threadpool = pthreadpool_create(nthreads))
 end
 
-function ∇relu(x::AbstractArray{T,N}, dy::AbstractArray{T,N}; nthreads::Int = 0) where {T,N}
+function ∇relu(x::AbstractArray{T,N}, dy::AbstractArray{T,N}; nthreads::UInt64 = NNPACK_CPU_THREADS) where {T,N}
     T == Float32 || error("NNPACK RELU GRADIENT supports only Float32")
     N != 1 || error("NNPACK RELU GRADIENT requires an array of 2 or more dimensions")
     nnp_relu_input_gradient(x, dy, similar(x), threadpool = pthreadpool_create(nthreads))
 end
 
-function leakyrelu(x::AbstractArray{T,N}, negative_slope::AbstractFloat = 0.01; inplace::Bool = true, nthreads::Int = 0) where {T,N}
+function leakyrelu(x::AbstractArray{T,N}, negative_slope::AbstractFloat = 0.01; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) where {T,N}
     T == Float32 || error("NNPACK RELU supports only Float32")
     N != 1 || error("NNPACK RELU requires an array of 2 or more dimensions")
     nnp_relu_output(x, inplace ? x : similar(x), negative_slope = negative_slope, threadpool = pthreadpool_create(nthreads))
 end
 
-function ∇leakyrelu(x::AbstractArray{T,N}, dy::AbstractArray{T,N}, negative_slope::AbstractFloat = 0.0; nthreads::Int = 0) where {T,N}
+function ∇leakyrelu(x::AbstractArray{T,N}, dy::AbstractArray{T,N}, negative_slope::AbstractFloat = 0.0; nthreads::UInt64 = NNPACK_CPU_THREADS) where {T,N}
     T == Float32 || error("NNPACK LEAKY RELU GRADIENT supports only Float32")
     N != 1 || error("NNPACK LEAKY RELU GRADIENT requires an array of 2 or more dimensions")
     nnp_relu_input_gradient(x, dy, similar(x), negative_slope = negative_slope, threadpool = pthreadpool_create(nthreads))
 end
 
-function softmax(x::AbstractVecOrMat{T}; nthreads::Int = 0) where T
+function softmax(x::AbstractVecOrMat{T}; nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK SOFTMAX supports only Float32")
     nnp_softmax_output(x, similar(x), threadpool = pthreadpool_create(nthreads))
 end
 
-function softmax!(x::AbstractVecOrMat{T}; inplace::Bool = true, nthreads::Int = 0) where T
+function softmax!(x::AbstractVecOrMat{T}; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK SOFTMAX supports only Float32")
     nnp_softmax_output(x, inplace ? x : similar(x), threadpool = pthreadpool_create(nthreads))
 end
 
-function softmax!(y::AbstractVecOrMat{T}, x::AbstractVecOrMat{T}; inplace::Bool = true, nthreads::Int = 0) where T
+function softmax!(y::AbstractVecOrMat{T}, x::AbstractVecOrMat{T}; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK SOFTMAX supports only Float32")
     nnp_softmax_output(x, y, threadpool = pthreadpool_create(nthreads))
 end
 
-function maxpool(x::AbstractArray{T,4}, k::Tuple; pad = map(_->0,k), stride = k, nthreads::Int = 0) where T
+function maxpool(x::AbstractArray{T,4}, k::Tuple; pad = map(_->0,k), stride = k, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK MAXPOOL 2D supports only Float32")
     maxpool!(similar(x, pdims(size(x), k, expand(Val{length(k)}, pad), expand(Val{length(k)}, stride))), x, k, pad = pad, stride = stride, threadpool = pthreadpool_create(nthreads))
 end
@@ -51,12 +51,12 @@ maxpool!(y::AbstractArray{Float32,4}, x::AbstractArray{Float32,4}, k::Tuple; pad
 #NOTE: The API for profiling in not exposed. Also profiling is not functional currently
 #NOTE: Mixed precision fully_connected inference and normal inference is not exposed
 
-function fullyconnected(x::AbstractArray{T,2}, w::AbstractArray{T,2}; nthreads::Int = 0) where T
+function fullyconnected(x::AbstractArray{T,2}, w::AbstractArray{T,2}; nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     nnp_fully_connected_output(x, w, zeros(Float32, size(w,1), size(x,2)), threadpool = pthreadpool_create(nthreads))
 end
 
-function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0) where T
+function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
@@ -65,7 +65,7 @@ function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}; pad = 0, stride = 1,
     conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
-function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0) where T
+function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS) where T
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)

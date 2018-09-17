@@ -1,8 +1,8 @@
-__precompile__()
-
 module NNPACK
 
 using Libdl, Requires
+
+const NNPACK_CPU_THREADS = JULIA_NUM_THREADS
 
 include("libnnpack_types.jl")
 include("error.jl")

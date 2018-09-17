@@ -14,28 +14,28 @@ export relu, leakyrelu, softmax, maxpool, conv, ∇conv_data,
 const AA{N} = AbstractArray{Float32,N}
 const AA1 = Union{AA{2}, AA{3}, AA{4}, AA{5}}
 
-relu(x::AA1; inplace::Bool = true, nthreads::Int = 0) =
+relu(x::AA1; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) =
     nnp_relu_output(x, inplace ? x : similar(x), threadpool = pthreadpool_create(nthreads))
 
-leakyrelu(x::AA1, a = oftype(x/1, 0.01); inplace::Bool = true, nthreads::Int = 0) =
+leakyrelu(x::AA1, a = oftype(x/1, 0.01); inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) =
     nnp_relu_output(x, inplace ? x : similar(x), negative_slope = a, threadpool = pthreadpool_create(nthreads))
 
-softmax!(x::AbstractVecOrMat{Float32}; inplace::Bool = true, nthreads::Int = 0) =
+softmax!(x::AbstractVecOrMat{Float32}; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) =
     nnp_softmax_output(x, inplace ? x : similar(x), threadpool = pthreadpool_create(nthreads))
 
-softmax!(y::AbstractVecOrMat{Float32},x::AbstractVecOrMat{Float32}; inplace::Bool = true, nthreads::Int = 0) =
+softmax!(y::AbstractVecOrMat{Float32},x::AbstractVecOrMat{Float32}; inplace::Bool = true, nthreads::UInt64 = NNPACK_CPU_THREADS) =
     nnp_softmax_output(x, y, threadpool = pthreadpool_create(nthreads))
 
-softmax(x::AbstractVecOrMat{Float32}; nthreads::Int = 0) =
+softmax(x::AbstractVecOrMat{Float32}; nthreads::UInt64 = NNPACK_CPU_THREADS) =
     nnp_softmax_output(x, similar(x), threadpool = pthreadpool_create(nthreads))
 
-maxpool(x::AA{4}, k; pad = map(_->0,k), stride = k, nthreads::Int = 0) =
+maxpool(x::AA{4}, k; pad = map(_->0,k), stride = k, nthreads::UInt64 = NNPACK_CPU_THREADS) =
     maxpool!(similar(x, pdims(size(x), k, expand(Val{length(k)}, pad), expand(Val{length(k)}, stride))), x, k, pad = expand(Val{length(k)}, pad), stride = expand(Val{length(k)}, stride), threadpool = pthreadpool_create(nthreads))
 
 maxpool!(y::AA{4}, x::AA{4}, k; pad = map(_->0,k), stride = k, threadpool = nothing) =
     nnp_max_pooling_output(x, y, k, padding = expand(Val{length(k)}, pad), stride = expand(Val{length(k)}, stride), threadpool = threadpool)
 
-function conv(x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0)
+function conv(x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS)
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
     y = similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_))
@@ -43,7 +43,7 @@ function conv(x::AA{4}, w::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, n
     conv!(y, x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
-function conv(x::AA{4}, w::AA{4}, b::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::Int = 0)
+function conv(x::AA{4}, w::AA{4}, b::AA{4}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS)
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
     conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
