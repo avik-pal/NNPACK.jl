@@ -69,7 +69,7 @@ function conv(x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,1
     T == Float32 || error("NNPACK FULLY CONNECTED supports only Float32")
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
-    conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+    conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
 conv!(y::AbstractArray{T,4}, x::AbstractArray{T,4}, w::AbstractArray{T,4}, b::AbstractArray{T,1}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) where T =

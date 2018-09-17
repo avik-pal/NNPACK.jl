@@ -46,7 +46,7 @@ end
 function conv(x::AA{4}, w::AA{4}, b::AA{1}; pad = 0, stride = 1, dilation = 1, algo = 0, nthreads::UInt64 = NNPACK_CPU_THREADS)
     dilation == 1 || error("NNPACK does not support dilation > 1")
     pad_, stride_ = padtuple(x, pad), padtuple(x, stride)
-    conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = algo, threadpool = pthreadpool_create(nthreads))
+    conv!(similar(x, cdims(size(x), dilation_dims(w, dilation), pad_, stride_)), x, w, b, pad = pad_, stride = stride_, dilation = dilation, algo = UInt32(algo), threadpool = pthreadpool_create(nthreads))
 end
 
 conv!(y::AA{4}, x::AA{4}, w::AA{4}, b::AA{1}; pad = 0, stride = 1, dilation = 1, algo = 0, threadpool = nothing) =
