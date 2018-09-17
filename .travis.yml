@@ -12,4 +12,4 @@ git:
 
 ## uncomment the following lines to override the default test script
 script:
- - julia -e 'ENV["JULIA_NUM_THREADS"]=4; using Pkg; Pkg.build(); Pkg.test()'
+ - julia -e 'ENV["JULIA_NUM_THREADS"]=4; using Pkg; Pkg.add("Test"); Pkg.build(); Pkg.test()'
