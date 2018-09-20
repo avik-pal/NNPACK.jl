@@ -1,5 +1,7 @@
 # NNPACK.jl
 
+This package has been shifted to __NNlib.jl__ and any furthur support will be provided there. The package will continue to exist here if someone wants to use it without Flux.
+
 This is a wrapper for the low level deep learning acceleration package
 for multicore CPUs [NNPACK](https://github.com/Maratyszcza/NNPACK).
 
