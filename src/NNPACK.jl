@@ -1,5 +1,3 @@
-__precompile__()
-
 module NNPACK
 
 using Libdl, Requires
@@ -7,6 +5,8 @@ using Libdl, Requires
 include("libnnpack_types.jl")
 include("error.jl")
 include("libnnpack.jl")
+
+has_nnlib = false
 
 const depsjl_path = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
 if !isfile(depsjl_path)
