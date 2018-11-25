@@ -58,7 +58,7 @@ function check_support(x, k, pad, stride, dilation = 1)
     supported = true
     dilation == 1 || dilation == (1, 1) || (supported = false)
     pad_, stride_ = expand(Val{length(k)}, pad), expand(Val{length(k)}, stride)
-    ((size(x, 1) - k[1] + 2 * pad_[1]) % stride_[1] == 0 && (size(x, 2) - k[2] + 2 * pad_[2]) % stride_[2] == 0) || (fallback = true)
+    ((size(x, 1) - k[1] + 2 * pad_[1]) % stride_[1] == 0 && (size(x, 2) - k[2] + 2 * pad_[2]) % stride_[2] == 0) || (supported = false)
     !supported && error("Operation Not Supported by NNPACK")
     return pad_, stride_
 end

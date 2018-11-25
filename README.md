@@ -1,17 +1,13 @@
 # NNPACK.jl
 
-This package has been shifted to __NNlib.jl__ and any furthur support will be provided there. The package will continue to exist here if someone wants to use it without Flux.
-
 This is a wrapper for the low level deep learning acceleration package
 for multicore CPUs [NNPACK](https://github.com/Maratyszcza/NNPACK).
 
 ### Usage Instructions
 
-There are currently 2 API's for using this package. Presence of [NNlib](https://github.com/FluxML/NNlib.jl) allows direct integration with [Flux](https://github.com/FluxML/Flux.jl).
-
-Currently the API is not documented but the exposed part of it is `interface.jl` and for NNlib part it's in `nnlib.jl`.
-
-To change the `NNPACK_NUM_THREADS` change the ENVIRONMENT VARIABLE `JULIA_NUM_THREADS` and load NNPACK. Ideally keep the `NNPACK_NUM_THREADS` between __4__ and __8__.
+__NNPACK__ can be directly used with NNlib without any dependency on this package. The NNPACK wrapper
+resides inside the NNlib package. For integration with other deep learning libraries this wrapper may
+be used.
 
 ### Installation
 
@@ -21,7 +17,27 @@ This package works on julia 1.0. So to install it simply do
 ] add https://github.com/avik-pal/NNPACK.jl
 ```
 
-This will work only on Linux. Follow the below instructions to get it working on __OSX__
+This will work only on Linux. Follow the `Installation for OSX` to get it working on __OSX__
+
+### Exported Functions
+
+1. `conv`
+2. `∇conv_data`
+3. `∇conv_filter`
+4. `softmax`
+5. `maxpool`
+
+To know more in detail about this functions refer to the `src/interface.jl` file. If you are familiar with the NNlib APIs then its pretty simple to understand this.
+
+There are other NNPACK functions available but their API is not exposed. For using them refer to
+the `src/libnnpack.jl` file.
+
+### Environment Variables
+
+1. `NNPACK_CPU_THREADS`: Controls the number of threads NNPACK is allowed to use. Defaults to `4`.
+2. `NNPACK_FAST_OPS`: Enables operations on `Float64` Arrays. However, you might loose precision and the final output will also be in `Float32`. Defaults to `1`.
+
+### Installation for OSX
 
 ```
 # Install PeachPy
@@ -50,4 +66,3 @@ After this copy the `libnnpack.so` to `~/.julia/packages/NNPACK/deps/usr/lib/lib
 1. __Windows__ is not supported by NNPACK. There is unofficial support for windows in [nnpack-windows](https://github.com/zeno40/nnpack-windows) but the API is a bit different.
 2. __OSX__ build will fail.
 3. __Travis tests__ fail due to Unsupported Hardware error.
-2. `BenchmarkTools` fails to time the code if `NNPACK_NUM_THREADS` is not set to `0`.
