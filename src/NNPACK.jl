@@ -14,17 +14,19 @@ if !isfile(depsjl_path)
 end
 include(depsjl_path)
 
-function __init__()
+const nnlib_interface_path = joinpath(dirname(@__FILE__), "interface.jl")
+global shared_threadpool = Ref(C_NULL)
+
+@init begin
     check_deps()
-    nnp_initialize()
-    has_nnlib = false
-    @require NNlib="872c559c-99b0-510c-b3b7-b6c96a88d5cd" has_nnlib=true
-    if has_nnlib
-        include(joinpath(dirname(@__FILE__), "nnlib.jl"))
-    else
-        include(joinpath(dirname(@__FILE__), "interface.jl"))
-        include(joinpath(dirname(@__FILE__), "utils.jl"))
+    status = nnp_initialize()
+    status == nnp_status_unsupported_hardware && error("HARDWARE is unsupported by NNPACK")
+    try
+        global NNPACK_CPU_THREADS = parse(UInt64, ENV["NNPACK_CPU_THREADS"])
+    catch
+        global NNPACK_CPU_THREADS = 4
     end
+    global shared_threadpool = Ref(pthreadpool_create(NNPACK_CPU_THREADS))
 end
 
 end
