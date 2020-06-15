@@ -1,3 +1,10 @@
+# NOTE
+
+This package is not officially maintained. It has been merged in [NNlib.jl](https://github.com/FluxML/NNlib.jl)
+which offers deep learning primitives for a variety of backends. The source code for NNPACK.jl is now maintained
+[here](https://github.com/FluxML/NNlib.jl/tree/master/src/nnpack) so please redirect any issue and pull requests
+to NNlib.jl.
+
 # NNPACK.jl
 
 This is a wrapper for the low level deep learning acceleration package
